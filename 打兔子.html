@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #area{
+            margin:0 auto;
+            position:absolute;
+            bottom: 3%;
+            /* top:30%; */
+            left:calc(50% - 400px);
+            font-size: 2em;
+        }
+        table{
+            width:800px;
+            height:400px;
+        }
+        td {
+            /* border: 1px solid black; */
+            text-align: center;
+            vertical-align: bottom;
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+        .red {
+            background: red;
+        }
+        .blue {
+            background: blue;
+        }
+        body {
+            /* url(圖檔路徑) x位置 y位置, 預設樣式 */
+            cursor: url(./2.gif) 0 25, auto;
+            background-image: url(./1.jpg);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-position:top;
+            color:red;
+        }
+        .hole{
+            width:120px;
+        }
+
+        .rabit{
+            position: absolute;
+            width:180px;
+            bottom:5px;
+            left:10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id=area>
+        <table>
+            <tr>
+                <td colspan="2"><img src="./3.png" class=hole alt=""></td>
+                <td></td>
+                <td colspan="2"><img src="./3.png" class=hole alt=""></td>
+                <!-- <td></td> -->
+                <!-- <td></td> -->
+            </tr>
+            <tr>
+                <td><img src="./3.png" class=hole alt=""></td>
+                <td><img src="./3.png" class=hole alt=""></td>
+                <td><img src="./3.png" class=hole alt=""></td>
+                <td><img src="./3.png" class=hole alt=""></td>
+                <td><img src="./3.png" class=hole alt=""></td>
+            </tr>
+
+        </table>
+        <input type="button" value="開始遊戲" id="startBtn"> <br>
+        目前分數: <span id="scoreText">0</span>
+        <br>
+        最高分數: <span id="highNameText">沒有人</span> 的分數是 <span id="highScoreText">0</span><br>
+    </div>
+    <script>
+        let score = 0;
+        let scoreText = document.getElementById("scoreText");
+        let startBtn = document.getElementById("startBtn");
+        let tds = document.getElementsByTagName("td");
+
+        // 設定計時器的變數為 0 ，避免被 clearInterval 清掉，才可以重複利用
+        let gameTimer = 0;
+
+        let high = { name: "", score: 0 };
+        let highNameText = document.getElementById("highNameText");
+        let highScoreText = document.getElementById("highScoreText");
+
+        let highStorage = window.localStorage.getItem("highscore");
+        if(highStorage != null){
+            high = JSON.parse(highStorage);
+            highNameText.innerText = high.name;
+            highScoreText.innerText = high.score;
+        }
+
+        startBtn.onclick = () => {
+            // 將開始按鈕停用
+            startBtn.setAttribute("disabled", true);
+
+            // 分數歸 0
+            score = 0;
+            scoreText.innerText = score;
+
+            gameTimer = setInterval(game, 1000);
+            game();
+            setTimeout(()=>{
+                clearInterval(gameTimer);
+                for(let i=0;i<8;i++){
+                    if(i!=1){
+                    tds[i].innerHTML=`<img src="./3.png" class=hole alt="">`;
+                    tds[i].setAttribute('data-rabit',0);
+                    }
+                }
+            
+                alert(`時間到，你得到 ${score} 分!`);
+                startBtn.removeAttribute("disabled");
+
+                if(score > high.score){
+                    let playerName = prompt("恭喜你得到最高分，請輸入你的名字");
+                    high.name = playerName;
+                    highNameText.innerText = playerName;
+                    high.score = score;
+                    highScoreText.innerText = score;
+
+                    // window.localStorage.setItem 只能存文字
+                    // JSON.stringify 可以將 JSON 陣列轉成文字
+                    window.localStorage.setItem("highscore", JSON.stringify(high));
+                }
+
+            }, 5000);
+        }
+
+        let game = () => {
+            // for(let td of tds){
+            //     td.classList.remove("red");
+            //     td.classList.remove("blue");
+            // }
+            for(let i=0;i<8;i++){
+                if(i!=1){
+                tds[i].innerHTML=`<img src="./3.png" class=hole alt="">`;
+                tds[i].setAttribute('data-rabit',0);
+                }
+                // insertElement.innerHTML=
+                // tds[rand].classList.add("red");
+            }
+            for(let i=0;i<3;i++){
+                let rand = Math.ceil(Math.random()*7);
+                if(rand<2){rand--}
+                //需在此插入兔子
+                tds[rand].innerHTML=`<img src="./3.png" class=hole alt=""> <img src=./3.gif class=rabit>`;
+                tds[rand].setAttribute('data-rabit',1);
+
+                // insertElement.innerHTML=
+                // tds[rand].classList.add("red");
+            }
+        }
+
+        for(let td of tds) {
+            td.onclick = () => {
+                console.log(td.getAttribute('data-rabit'))
+                if(td.getAttribute('data-rabit')==1){
+                    td.innerHTML=`<img src="./3.png" class=hole alt="">`;
+                    td.setAttribute('data-rabit',0);
+                    score++;
+                    scoreText.innerText = score;
+                }
+            } 
+        }
+    </script>
+</body>
+</html>
